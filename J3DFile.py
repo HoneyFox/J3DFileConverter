@@ -14,6 +14,9 @@ class Name:
 
     def serialize(self, f):
         f.write(self.name)
+    
+    def deserialize(self, f):
+        self.name = bytearray(f.read(32))
 
 class Vertex:
     def __init__(self):
@@ -42,6 +45,21 @@ class Vertex:
         f.write(struct.pack("<f", self.uv[1]))
         f.write(struct.pack("<f", self.uv[2]))
 
+    def deserialize(self, f):
+        self.pos = []
+        self.pos.append(struct.unpack("<f", f.read(4))[0])
+        self.pos.append(struct.unpack("<f", f.read(4))[0])
+        self.pos.append(struct.unpack("<f", f.read(4))[0])
+        self.pos.append(struct.unpack("<f", f.read(4))[0])
+        self.normal = []
+        self.normal.append(struct.unpack("<f", f.read(4))[0])
+        self.normal.append(struct.unpack("<f", f.read(4))[0])
+        self.normal.append(struct.unpack("<f", f.read(4))[0])
+        self.uv = []
+        self.uv.append(struct.unpack("<f", f.read(4))[0])
+        self.uv.append(struct.unpack("<f", f.read(4))[0])
+        self.uv.append(struct.unpack("<f", f.read(4))[0])
+        
 class Triangle:
     def __init__(self):
         self.indices = None
@@ -53,6 +71,12 @@ class Triangle:
         f.write(self.indices[0].to_bytes(2, 'little', signed=False))
         f.write(self.indices[1].to_bytes(2, 'little', signed=False))
         f.write(self.indices[2].to_bytes(2, 'little', signed=False))
+    
+    def deserialize(self, f):
+        self.indices = []
+        self.indices.append(int.from_bytes(f.read(2), 'little', signed=False))
+        self.indices.append(int.from_bytes(f.read(2), 'little', signed=False))
+        self.indices.append(int.from_bytes(f.read(2), 'little', signed=False))
 
 class Texture:
     def __init__(self):
@@ -65,6 +89,10 @@ class Texture:
 
     def serialize(self, f):
         self.name.serialize(f)
+    
+    def deserialize(self, f):
+        self.name = Name()
+        self.name.deserialize(f)
 
 class Model:
     def __init__(self):
@@ -144,6 +172,32 @@ class Model:
         f.write(self.unknown2[2].to_bytes(2, 'little', signed=False))
         f.write(self.unknown2[3].to_bytes(2, 'little', signed=False))
 
+    def deserialize(self, f):
+        self.model_name = Name()
+        self.model_name.deserialize(f)
+        self.offset = []
+        self.offset.append(struct.unpack("<f", f.read(4))[0])
+        self.offset.append(struct.unpack("<f", f.read(4))[0])
+        self.offset.append(struct.unpack("<f", f.read(4))[0])
+        self.unknown1[0] = int.from_bytes(f.read(4), 'little', signed=False)
+        self.unknown1[1] = int.from_bytes(f.read(4), 'little', signed=False)
+        self.unknown1[2] = int.from_bytes(f.read(4), 'little', signed=False)
+        self.unknown1[3] = int.from_bytes(f.read(4), 'little', signed=False)
+        self.nextSiblingModelIndex = int.from_bytes(f.read(4), 'little', signed=True)
+        self.prevSiblingModelIndex = int.from_bytes(f.read(4), 'little', signed=True)
+        self.parentModelIndex = int.from_bytes(f.read(4), 'little', signed=True)
+        self.childModelIndex = int.from_bytes(f.read(4), 'little', signed=True)
+        self.tri_num = int.from_bytes(f.read(2), 'little', signed=False)
+        self.tri_offset = int.from_bytes(f.read(2), 'little', signed=False)
+        self.vert_num = int.from_bytes(f.read(2), 'little', signed=False)
+        self.vert_offset = int.from_bytes(f.read(2), 'little', signed=False)
+        self.use_tex = int.from_bytes(f.read(2), 'little', signed=False)
+        self.mat_index = int.from_bytes(f.read(2), 'little', signed=False)
+        self.unknown2[0] = int.from_bytes(f.read(2), 'little', signed=False)
+        self.unknown2[1] = int.from_bytes(f.read(2), 'little', signed=False)
+        self.unknown2[2] = int.from_bytes(f.read(2), 'little', signed=False)
+        self.unknown2[3] = int.from_bytes(f.read(2), 'little', signed=False)
+
 class Material:
     def __init__(self):
         self.ambient = None
@@ -187,6 +241,29 @@ class Material:
         f.write(struct.pack("<f", self.emissive[2]))
         f.write(struct.pack("<f", self.emissive[3]))
         f.write(struct.pack("<f", self.shininess))
+
+    def deserialize(self, f):
+        self.ambient = []
+        self.ambient.append(struct.unpack("<f", f.read(4))[0])
+        self.ambient.append(struct.unpack("<f", f.read(4))[0])
+        self.ambient.append(struct.unpack("<f", f.read(4))[0])
+        self.ambient.append(struct.unpack("<f", f.read(4))[0])
+        self.diffuse = []
+        self.diffuse.append(struct.unpack("<f", f.read(4))[0])
+        self.diffuse.append(struct.unpack("<f", f.read(4))[0])
+        self.diffuse.append(struct.unpack("<f", f.read(4))[0])
+        self.diffuse.append(struct.unpack("<f", f.read(4))[0])
+        self.specular = []
+        self.specular.append(struct.unpack("<f", f.read(4))[0])
+        self.specular.append(struct.unpack("<f", f.read(4))[0])
+        self.specular.append(struct.unpack("<f", f.read(4))[0])
+        self.specular.append(struct.unpack("<f", f.read(4))[0])
+        self.emissive = []
+        self.emissive.append(struct.unpack("<f", f.read(4))[0])
+        self.emissive.append(struct.unpack("<f", f.read(4))[0])
+        self.emissive.append(struct.unpack("<f", f.read(4))[0])
+        self.emissive.append(struct.unpack("<f", f.read(4))[0])
+        self.shininess = struct.unpack("<f", f.read(4))[0]
 
 class J3DFile:
     def __init__(self):
@@ -274,3 +351,39 @@ class J3DFile:
             f.write(i.to_bytes(1, 'little', signed=True))
         for mat in self.mats:
             mat.serialize(f)
+
+    def load_file(self, path: str):
+        f = open(path, 'rb')
+        self.vert_num = int.from_bytes(f.read(4), 'little', signed=False)
+        self.tri_num = int.from_bytes(f.read(4), 'little', signed=False)
+        self.tex_num = int.from_bytes(f.read(4), 'little', signed=False)
+        self.model_num = int.from_bytes(f.read(4), 'little', signed=False)
+        self.mat_num = int.from_bytes(f.read(4), 'little', signed=False)
+        self.verts = []
+        for i in range(0, self.vert_num):
+            vert = Vertex()
+            vert.deserialize(f)
+            self.verts.append(vert)
+        self.tris = []
+        for i in range(0, self.tri_num):
+            tri = Triangle()
+            tri.deserialize(f)
+            self.tris.append(tri)
+        self.texs = []
+        for i in range(0, self.tex_num):
+            tex = Texture()
+            tex.deserialize(f)
+            self.texs.append(tex)
+        self.models = []
+        for i in range(0, self.model_num):
+            model = Model()
+            model.deserialize(f)
+            self.models.append(model)
+        self.tri_tex_indices = []
+        for i in range(0, self.tri_num):
+            self.tri_tex_indices.append(int.from_bytes(f.read(1), 'little', signed=True))
+        self.mats = []
+        for i in range(0, self.mat_num):
+            mat = Material()
+            mat.deserialize(f)
+            self.mats.append(mat)
